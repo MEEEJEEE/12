@@ -73,6 +73,7 @@ void checkDie(void)
 		if (board_getBoardStatus(player_position[i]) == BOARDSTATUS_NOK)
 			player_status[i] = PLAYERSTATUS_DIE;
 }
+
 // 게임 종료 여부 확인
 int game_end(void) {
 	int i;
@@ -101,7 +102,7 @@ int getAlivePlayer(void) {
 	return cnt;
 }
 
-// 승자 결정
+// 승자 결정 
 int getWinner(void) {
 	int i;
 	int winner = 0;
@@ -115,6 +116,7 @@ int getWinner(void) {
 	}
 	return winner;
 }
+
 int main(int argc, char* argv[])
 {
 	int pos = 0;
@@ -122,6 +124,7 @@ int main(int argc, char* argv[])
 	int turn = 0;
 
 	srand((unsigned)time(NULL));
+	
 //1-1.플레리어 초기화 및 이름 결정
 for (i=0; i < N_PLAYER; i++)
 {
@@ -129,6 +132,7 @@ for (i=0; i < N_PLAYER; i++)
 	player_coin[i] = 0;
 	player_status[i] = PLAYERSTATUS_LIVE;
 	printf("Player %i's name: ", i);
+	scanf("%s", player_name[i]);
 }
 
 opening();
@@ -162,7 +166,7 @@ do {
 	fflush(stdin);
 	step = rolldie();
 
-//2-3. 이동
+//2-3. 이동 
 	player_position[turn] += step;
 	if (player_position[turn] >= N_BOARD)
 		player_position[turn] = N_BOARD - 1;
@@ -170,9 +174,9 @@ do {
 	if (player_position[turn] == N_BOARD - 1)
 		player_status[turn] = PLAYERSTATUS_END;
 
-//2-4. 동전 줍기
-	coinResult = board_getBoardCoin(pos);
-	player_coin[turn] += coinResult;
+//2-4. 동전 줍기 
+	coinResult = board_getBoardCoin(player_position[turn]);
+    player_coin[turn] += coinResult;
 
 	//2-5. 다음턴
 	turn = (turn + 1) % N_PLAYER; //wrap around
@@ -185,52 +189,10 @@ do {
 		//printf();
 		checkDie();
 	}
-} while (game_end() == 0);
-//3. 정리 (승자 계산, 출력 등) 
-int game_end(void)
-{
-	int i;
-	int flag_end = 1;
+} while (!game_end());
+// 3. 정리 (승자 계산, 출력 등)
+    printf("Game Over!\n");
+    printf("Winner is Player %d!\n", getWinner());
 
-	//if all the players are died?
-	for (i = 0;i < N_PLAYER; i++)
-	{
-		if (player_status[i] == PLAYERSTATUS_LIVE)
-		{
-			flag_end = 0;
-			break;
-		}
-	}
-
-	return flag_end;
-}
-
-int getAlivePlayer(void)
-{
-	int i; 
-	int cnt = 0; 
-	for (i = 0; i < N_PLAYER; i++)
-	{
-		if (player_status[i] == PLAYERSTATUS_END)
-			cnt++;
-	}
-	
-	return cnt;
-}
-int getWinner(void)
-{
-	int i; 
-	int winner = 0; 
-	int max_coin = -1;
-
-	for (i = 0; i < N_PLAYER; i++)
-	{
-		if (player_coin[i] > max_coin)
-		{
-			max_coin = player_coin[i];
-			winner = i;
-		}
-	}
-	return winner;
-}
+    return 0;
 }
